@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CLIDownloader": {
+      "commandName": "Project",
+      "commandLineArgs": "download --verbose --dry-run configT.yml"
+    }
+  }
+}
