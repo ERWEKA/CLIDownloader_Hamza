@@ -22,12 +22,12 @@ var configArgument = new Argument<string>(
    name: "configuration-file", "Configuration file (.yaml) which contains all necessary data needed for the download job");
 
 var downloadCommand = new Command("download", "Downloads files from urls")
-   {
-      verboseOption,
-      dryRunOption,
-      parallelDownloadsOption,
-      configArgument
-   };
+{
+   verboseOption,
+   dryRunOption,
+   parallelDownloadsOption,
+   configArgument
+};
 
 downloadCommand.SetHandler(
    async (isVerbose, isDryRun, parallelDownloads, configFile) =>
@@ -39,18 +39,19 @@ downloadCommand.SetHandler(
 rootCommand.Add(downloadCommand);
 
 // Set up "validate [--verbose] config.yml" command
-var validateCommand = new Command("validate", "Validates downloaded files integrity against their respective checksums if available")
-   {
-      verboseOption,
-      configArgument
-   };
+var validateCommand = new Command("validate", "Validates downloaded files integrity against their respective checksum if available")
+{
+   verboseOption,
+   configArgument
+};
 
 rootCommand.Add(validateCommand);
 await rootCommand.InvokeAsync(args);
 
+
 static async Task ExecuteDownloadCommand(bool isVerbose, bool isDryRun, int parallelDownloads, string configFile)
 {
-   //The builder checks if the config file exists, and throws an exception accordingly
+   // The builder checks if the config file exists, and throws an exception accordingly
    IHost host = Host.CreateDefaultBuilder()
       .ConfigureAppConfiguration(builder =>
       {
@@ -59,6 +60,7 @@ static async Task ExecuteDownloadCommand(bool isVerbose, bool isDryRun, int para
       .ConfigureServices(services =>
       {
          services.AddSingleton<HttpClient>();
+         services.AddSingleton<Downloader>();
       })
       .Build();
 
@@ -71,7 +73,11 @@ static async Task ExecuteDownloadCommand(bool isVerbose, bool isDryRun, int para
    var downloadDirectory = conf.GetValue<string>("config:download_dir")!;
    var directory = Directory.CreateDirectory(conf.GetValue<string>("config:download_dir")!);
 
-   //var client = host.Services.GetService<HttpClient>()!;
-   var list = new List<DownloadConfig>();
+   var list = new List<DownloadData>();
    conf.GetRequiredSection("downloads").Bind(list);
+
+   await host.StartAsync();
+
+   var downloader = host.Services.GetRequiredService<Downloader>();
+   await downloader.StartDownloadsAsync(list, parallelDownloads, directory);
 }

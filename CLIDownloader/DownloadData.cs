@@ -8,7 +8,7 @@ using YamlDotNet.Serialization;
 
 namespace CLIDownloader;
 
-internal record DownloadConfig
+internal record DownloadData
 {
    [YamlMember(Alias = "url")]
    public string URL { get; set; } = null!;
