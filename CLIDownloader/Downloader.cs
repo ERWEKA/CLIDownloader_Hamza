@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace CLIDownloader;
 
-internal class Downloader
+public class Downloader
 {
    readonly HttpClient httpClient;
 
@@ -112,7 +106,7 @@ internal class Downloader
       await CopyStreamAsync(stream, file, contentLength, reportProgress, bufferSize);
    }
 
-   static async Task CopyStreamAsync(Stream source, Stream destination, long size, Action<int> reportProgress, int bufferSize)
+   public static async Task CopyStreamAsync(Stream source, Stream destination, long size, Action<int> reportProgress, int bufferSize)
    {
       var buffer = new Memory<byte>(new byte[bufferSize]);
       long bytesRead = 0;
