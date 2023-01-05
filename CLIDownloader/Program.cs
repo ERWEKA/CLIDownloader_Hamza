@@ -73,11 +73,30 @@ static async Task ExecuteDownloadCommand(bool isVerbose, bool isDryRun, int para
    var downloadDirectory = conf.GetValue<string>("config:download_dir")!;
    var directory = Directory.CreateDirectory(conf.GetValue<string>("config:download_dir")!);
 
-   var list = new List<DownloadData>();
-   conf.GetRequiredSection("downloads").Bind(list);
+   var downloads = new List<DownloadData>();
+   conf.GetRequiredSection("downloads").Bind(downloads);
 
    await host.StartAsync();
+   if (isDryRun)
+   {
+      ExecuteDryRun(downloads, parallelDownloads, directory);
+      return;
+   }
 
    var downloader = host.Services.GetRequiredService<Downloader>();
-   await downloader.StartDownloadsAsync(list, parallelDownloads, directory);
+   await downloader.StartDownloadsAsync(downloads, parallelDownloads, directory);
+}
+
+static void ExecuteDryRun(IEnumerable<DownloadData> downloads, int parallelDownloads, DirectoryInfo directory)
+{
+   Console.WriteLine();
+   Console.WriteLine($"Download folder: {directory.FullName}");
+   Console.WriteLine($"Parallel downloads: {parallelDownloads}");
+   Console.WriteLine("Downloads:");
+
+   foreach (var download in downloads)
+   {
+        Console.WriteLine();
+        Console.WriteLine(download);
+    }
 }

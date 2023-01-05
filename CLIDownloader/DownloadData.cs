@@ -17,5 +17,5 @@ internal record DownloadData
    public string? SHA256 { get; set; }
 
    [YamlMember(Alias = "overwrite")]
-   public bool? Overwrite { get; set; }
+   public bool Overwrite { get; set; }
 }

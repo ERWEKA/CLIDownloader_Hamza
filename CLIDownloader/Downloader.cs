@@ -13,7 +13,7 @@ public class Downloader
       httpClient = client;
    }
 
-   internal async Task StartDownloadsAsync(IEnumerable<DownloadData> downloadConfigs, int parallelDownloads, DirectoryInfo directory)
+   internal async Task StartDownloadsAsync(IEnumerable<DownloadData> downloads, int parallelDownloads, DirectoryInfo directory)
    {
       var consoleLock = new object();
 
@@ -33,7 +33,7 @@ public class Downloader
 
       // Reserve a placeholder for the visual progress of each download
       var visualIndex = Console.CursorTop / 2;
-      await Parallel.ForEachAsync(downloadConfigs, new ParallelOptions { MaxDegreeOfParallelism = parallelDownloads }, async (download, token) =>
+      await Parallel.ForEachAsync(downloads, new ParallelOptions { MaxDegreeOfParallelism = parallelDownloads }, async (download, token) =>
       {
          // Interlocked solves the race condition while incrementing the index
          var index = Interlocked.Increment(ref visualIndex) * 2;
