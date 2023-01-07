@@ -43,7 +43,7 @@ public class Downloader
          index += 1;
 
          var file = new FileInfo(Path.Combine(directory.FullName, download.File));
-         if (file.Exists && download.Overwrite is not true)
+         if (file.Exists && download.Overwrite is false)
          {
             writeToConsole(0, index, "File exists !");
             return;

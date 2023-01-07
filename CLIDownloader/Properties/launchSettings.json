@@ -2,7 +2,7 @@
   "profiles": {
     "CLIDownloader": {
       "commandName": "Project",
-      "commandLineArgs": "download --verbose --dry-run parallel-downloads=2 TestConfig.yml"
+      "commandLineArgs": "validate TestConfig.yml"
     }
   }
 }
