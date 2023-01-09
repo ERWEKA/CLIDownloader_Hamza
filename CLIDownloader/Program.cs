@@ -7,7 +7,9 @@ using CLIDownloader;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Win32.SafeHandles;
 
+using Serilog;
 
 var rootCommand = new RootCommand("Downloads multiple files from various sources in parallel");
 
@@ -72,6 +74,15 @@ static async Task ExecuteDownloadCommand(bool isVerbose, bool isDryRun, int para
          services.AddSingleton<HttpClient>();
          services.AddSingleton<Downloader>();
       })
+      .UseSerilog((context, configuration) =>
+      {
+         var config = context.Configuration;
+         configuration.ReadFrom.Configuration(config);
+         if (isVerbose)
+         {
+            configuration.MinimumLevel.Override("CLIDownloader", Serilog.Events.LogEventLevel.Verbose);
+         }
+      })
       .Build();
 
    // Read configuration
@@ -117,6 +128,19 @@ static async Task ExecuteValidateCommand(bool isVerbose, string configFile)
       {
          builder.AddYamlFile(configFile, optional: false);
       })
+      .ConfigureServices(services =>
+      {
+         services.AddSingleton<Validator>();
+      })
+      .UseSerilog((context, configuration) =>
+      {
+         var config = context.Configuration;
+         configuration.ReadFrom.Configuration(config);
+         if (isVerbose)
+         {
+            configuration.MinimumLevel.Override("CLIDownloader", Serilog.Events.LogEventLevel.Verbose);
+         }
+      })
       .Build();
 
    // Read configuration
@@ -130,5 +154,7 @@ static async Task ExecuteValidateCommand(bool isVerbose, string configFile)
 
    var downloads = conf.GetRequiredSection("downloads").Get<IEnumerable<DownloadData>>()!;
 
-   await Validator.Validate(downloads, directory);
+   var validator = host.Services.GetRequiredService<Validator>();
+
+   await validator.Validate(downloads, directory);
 }
